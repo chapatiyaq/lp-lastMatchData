@@ -1,3 +1,4 @@
+/*globals $: false, mw: false */
 $( document ).ready( function() {
 
 $.fn.lastMatchData = function ( options ) {
@@ -16,11 +17,11 @@ $.fn.lastMatchData = function ( options ) {
     function parsePlayer ( $playerCell ) {
         var player = { flag: '', race: '', name: '' };
         $playerCell.find( 'img' ).each( function() {
-            var filename = $( this ).attr( 'src' ).match( /[^\/]*\.( png|gif )$/ )[ 0 ];
+            var filename = $( this ).attr( 'src' ).match( /[^\/]*\.(png|gif)$/ )[ 0 ];
             if ( filename.match( /^( P|T|Z|R )icon_small\.png$/) !== null ) {
                 player.race = filename.match( /^( P|T|Z|R )icon_small\.png$/ )[ 1 ].toLowerCase();
-            } else if ( filename.match( /^[A-Z][a-z][a-z]?\.( png|gif )$/ ) !== null ) {
-                player.flag = filename.match( /^( [A-Z][a-z][a-z]? )\.( png|gif )$/ )[ 1 ].toLowerCase( );
+            } else if ( filename.match( /^[A-Z][a-z][a-z]?\.(png|gif)$/ ) !== null ) {
+                player.flag = filename.match( /^([A-Z][a-z][a-z]?)\.(png|gif)$/ )[ 1 ].toLowerCase( );
             }
         } );
         player.name = $playerCell.text().trim();
@@ -36,11 +37,11 @@ $.fn.lastMatchData = function ( options ) {
     function parsePlayerInPrizePoolTable( $playerCell ) {
         var player = {flag: '', race: '', name: ''};
         $playerCell.find( 'img' ).each( function() {
-            var filename = $( this ).attr( 'src' ).match( /[^\/]*\.( png|gif )$/ )[ 0 ];
-            if ( filename.match( /^( P|T|Z|R )icon_small\.png$/ ) !== null ) {
-                player.race = filename.match( /^( P|T|Z|R )icon_small\.png$/ )[ 1 ].toLowerCase();
-            } else if ( filename.match( /^[A-Z][a-z][a-z]?\.( png|gif )$/ ) !== null ) {
-                player.flag = filename.match( /^( [A-Z][a-z][a-z]? )\.( png|gif )$/ )[ 1 ].toLowerCase( );
+            var filename = $( this ).attr( 'src' ).match( /[^\/]*\.(png|gif)$/ )[ 0 ];
+            if ( filename.match( /^(P|T|Z|R)icon_small\.png$/ ) !== null ) {
+                player.race = filename.match( /^(P|T|Z|R)icon_small\.png$/ )[ 1 ].toLowerCase();
+            } else if ( filename.match( /^[A-Z][a-z][a-z]?\.(png|gif)$/ ) !== null ) {
+                player.flag = filename.match( /^([A-Z][a-z][a-z]?)\.(png|gif)$/ )[ 1 ].toLowerCase();
             }
         } );
         player.name = $playerCell.text().trim();
@@ -56,9 +57,9 @@ $.fn.lastMatchData = function ( options ) {
     function parsePlayerInBracket( $playerCell ) {
         var player = {flag: '', race: '', name: ''};
         $playerCell.find( 'img' ).each( function() {
-            var filename = $( this ).attr( 'src' ).match( /[^\/]*\.( png|gif )$/ )[ 0 ];
-            if ( filename.match( /^[A-Z][a-z][a-z]?\.( png|gif )$/ ) !== null ) {
-                player.flag = filename.match( /^( [A-Z][a-z][a-z]? )\.( png|gif )$/ )[ 1 ].toLowerCase( );
+            var filename = $( this ).attr( 'src' ).match( /[^\/]*\.(png|gif)$/ )[ 0 ];
+            if ( filename.match( /^[A-Z][a-z][a-z]?\.(png|gif)$/ ) !== null ) {
+                player.flag = filename.match( /^([A-Z][a-z][a-z]?)\.(png|gif)$/ )[ 1 ].toLowerCase( );
             }
         } );
         var raceColorMatch = $playerCell.css( 'background' ).match( /rgba?\(( [^0][^,]* ), ( [^,]* ), ( [^,\ )]*)/ );
@@ -81,30 +82,9 @@ $.fn.lastMatchData = function ( options ) {
         return str[ 0 ].toUpperCase() + str.substr( 1 ).replace( /_/g, ' ' );
     }
 
-    function playerWikitext( i, player ) {
-        var wikitext = '|';
-        if ( player.page !== undefined ) {
-            wikitext += player.page.replace( /_/g, ' ' ) + '{{!}}';
-        }
-        wikitext += player.name + ' ';
-        wikitext += '|flag' + i + '=' + player.flag + ' ';
-        wikitext += '|race' + i + '=' + player.race + ' ';
-        return wikitext;
-    }
-
-    function playerLastOpponentWikitext( i, player ) {
-        var wikitext = '|lastvs' + i + '=';
-        if ( player.page !== undefined ) {
-            wikitext += player.page.replace( /_/g, ' ' ) + '{{!}}';
-        }
-        wikitext += player.name + ' ';
-        wikitext += '|lastvsrace' + i + '=' + player.race + ' ';
-        return wikitext;
-    }
-
     function parseDate( $dateCell ) {
         var dateMatch;
-        dateMatch = $dateCell.text().replace( /\[[^\]]+\]/g, '' ).match( /.*( ?:19|20 )[0-9]{2}/ );
+        dateMatch = $dateCell.text().replace( /\[[^\]]+\]/g, '' ).match( /.*(?:19|20)[0-9]{2}/ );
         if ( dateMatch !== null ) {
             return ( new Date( dateMatch ) ).toISODateOnly();
         }
@@ -350,21 +330,6 @@ $.fn.lastMatchData = function ( options ) {
         }
     } );
 
-    /*var wikitext = '';
-    for ( j = 0; j < players.length; ++j ) {
-        wikitext += '\n' + playerWikitext( 'X', players[ j ] );
-        wikitext +='|teamX= ';
-        if ( players[ j ].lastMatch.vsIndex >= 0 ) {
-            wikitext += playerLastOpponentWikitext( 'X', players[ players[ j ].lastMatch.vsIndex ] );
-        } else {
-            wikitext += '|lastvsX=' + players[ j ].lastMatch.vsName + ' ';
-        }
-        wikitext +='|lastscoreX=' + players[ j ].lastMatch.score + ' ';
-        wikitext +='|lastvsscoreX=' + players[ j ].lastMatch.vsScore + ' ';
-        wikitext +='|dateX=' + players[ j ].lastMatch.date;
-    }
-    console.log( wikitext );*/
-
     var entries = [];
     var hasAnEntryWithNonEmptyDate = false;
     for ( j = 0; j < players.length; ++j ) {
@@ -476,7 +441,7 @@ $.fn.lastMatchData = function ( options ) {
                     regExPattern += rePage + ' *\\{\\{!\\}\\} *';
                 }
                 regExPattern += entries[ j ].player.name;
-                regExPattern += '[^\\}\\n]+( [0-9]+ )=[^\\}\\n]+?) *( ?=[\\}\\n] )';
+                regExPattern += '[^\\}\\n]+([0-9]+)=[^\\}\\n]+?) *(?=[\\}\\n])';
                 var re = new RegExp( regExPattern );
                 var matches = modifiedText.match( re );
                 if ( matches !== null ) {
