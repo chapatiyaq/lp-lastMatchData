@@ -471,7 +471,7 @@ $.fn.lastMatchData = function ( options ) {
                     }
                     if ( forceEmptyDateField ) {
                         append.push( '|date' + i + '=' );
-                    } else if ( ( entries[ j ].date !== '' || entries[ j ].date != endDate.toISODateOnly() || !noDateIfEndDate ) &&
+                    } else if ( ( entries[ j ].date === '' || entries[ j ].date != endDate.toISODateOnly() || !noDateIfEndDate ) &&
                         hasAnEntryWithNonEmptyDate ) {
                         append.push( '|date' + i + '=' + entries[ j ].date );
                     }
