@@ -449,7 +449,7 @@ $.fn.lastMatchData = function ( options ) {
                     regExPattern += rePage + ' *\\{\\{!\\}\\} *';
                 }
                 regExPattern += entries[ j ].player.name;
-                regExPattern += '[^\\}\\n]+([0-9]+)=[^\\}\\n]+?) *(?=[\\}\\n])';
+                regExPattern += '[^\\}\\n]+?([0-9]+)=[^\\}\\n]+?) *(?=[\\}\\n])';
                 var re = new RegExp( regExPattern );
                 var matches = modifiedText.match( re );
                 if ( matches !== null ) {
@@ -481,7 +481,7 @@ $.fn.lastMatchData = function ( options ) {
                 }
             }
             if ( groupDatesInSlots ) {
-                var ppsRe = /(\{\{ *(?:Template *:)?[Pp]rize[ _]pool[ _]slot *(?:\|(?:place|usdprize|localprize|points)= *(?:\[\[[^\]]*\]\]|[^\|\n]*) *| )*)(\n*[\s\S]*?)\}\}/g,
+                var ppsRe = /(\{\{ *(?:Template *:)?[Pp]rize[ _]pool[ _]slot *(?:\|(?:place|usdprize|localprize|points)= *(?:\[\[[^\]]*\]\]|[^\|\n]*) *| )*)(\n*(?:\{\{\!\}\}|(?!\}\})[\s\S])*)\}\}/g,
                     ppsMatches,
                     textToProcess = modifiedText;
                 while ( ( ppsMatches = ppsRe.exec( textToProcess ) ) !== null ) {
