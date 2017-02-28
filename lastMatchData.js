@@ -30,7 +30,7 @@ $.fn.lastMatchData = function ( options ) {
         player.name = $playerCell.text().trim();
         if ( $playerCell.find( 'span > a' ).length == 1 ) {
             player.name = $playerCell.find( 'span > a' ).text().trim();
-            var page = $playerCell.find( 'span > a' ).attr( 'title' ).replace( ' ( page does not exist )', '' );
+            var page = $playerCell.find( 'span > a' ).attr( 'title' ).replace( ' (page does not exist)', '' );
             if ( cleanTitle( page ) != cleanTitle( player.name ) ) {
                 player.page = page;
             }
@@ -50,7 +50,7 @@ $.fn.lastMatchData = function ( options ) {
         } );
         player.name = $playerCell.text().trim();
         if ( $playerCell.find( 'a:nth-child( 3)' ).length > 0 ) {
-            var page = $playerCell.find( 'a:nth-child( 3)' ).attr( 'title' ).replace( ' ( page does not exist )', '' );
+            var page = $playerCell.find( 'a:nth-child( 3)' ).attr( 'title' ).replace( ' (page does not exist)', '' );
             if ( cleanTitle( page ) != cleanTitle( player.name ) ) {
                 player.page = page;
             }
@@ -375,7 +375,7 @@ $.fn.lastMatchData = function ( options ) {
             if ( players[ j ].lastMatch.date )
                 entries[ j ].date = players[ j ].lastMatch.date;
             else
-                entries[ j ].date = defaultDateIsEndDate ? endDate.toISODateOnly() : '';
+                entries[ j ].date = defaultDateIsEndDate && endDate ? endDate.toISODateOnly() : '';
             hasAnEntryWithNonEmptyDate |= ( entries[ j ].date !== '' );
         }
     }
@@ -471,7 +471,7 @@ $.fn.lastMatchData = function ( options ) {
                     }
                     if ( forceEmptyDateField ) {
                         append.push( '|date' + i + '=' );
-                    } else if ( ( entries[ j ].date === '' || entries[ j ].date != endDate.toISODateOnly() || !noDateIfEndDate ) &&
+                    } else if ( ( entries[ j ].date === '' || !( endDate && entries[ j ].date == endDate.toISODateOnly() && noDateIfEndDate ) ) &&
                         hasAnEntryWithNonEmptyDate ) {
                         append.push( '|date' + i + '=' + entries[ j ].date );
                     }
