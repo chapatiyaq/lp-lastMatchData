@@ -2,11 +2,14 @@
 $( document ).ready( function() {
 
 $.fn.lastMatchData = function ( options ) {
-    var forceDateToEndDate = options.forceDateToEndDate !== undefined ? options.forceDateToEndDate : false,
-        action = options.action !== undefined ? options.action : 'outputtext',
-        codeForTableOnly = options.codeForTableOnly !== undefined ? options.codeForTableOnly : false,
+    var action = options.action !== undefined ? options.action : 'outputtext',
         output = options.output !== undefined ? options.output : 'console',
-        summary = options.summary !== undefined ? options.summary : 'Prize pool last results';
+        codeForTableOnly = options.codeForTableOnly !== undefined ? options.codeForTableOnly : false,
+        summary = options.summary !== undefined ? options.summary : 'Prize pool last results',
+        defaultDateIsEndDate = options.defaultDateIsEndDate !== undefined ? options.defaultDateIsEndDate : false,
+        forceEmptyDateField = options.forceEmptyDateField !== undefined ? options.forceEmptyDateField : false,
+        noDateIfEndDate = options.noDateIfEndDate !== undefined ? options.noDateIfEndDate : true,
+        groupDatesInSlots = options.groupDatesInSlots !== undefined ? options.groupDatesInSlots : true;
 
     Date.prototype.toISODateOnly = function() {
         return this.getFullYear() +
@@ -21,11 +24,12 @@ $.fn.lastMatchData = function ( options ) {
             if ( filename.match( /^( P|T|Z|R )icon_small\.png$/) !== null ) {
                 player.race = filename.match( /^( P|T|Z|R )icon_small\.png$/ )[ 1 ].toLowerCase();
             } else if ( filename.match( /^[A-Z][a-z][a-z]?\.(png|gif)$/ ) !== null ) {
-                player.flag = filename.match( /^([A-Z][a-z][a-z]?)\.(png|gif)$/ )[ 1 ].toLowerCase( );
+                player.flag = filename.match( /^([A-Z][a-z][a-z]?)\.(png|gif)$/ )[ 1 ].toLowerCase();
             }
         } );
         player.name = $playerCell.text().trim();
-        if ( $playerCell.find( 'span > a' ).length > 0 ) {
+        if ( $playerCell.find( 'span > a' ).length == 1 ) {
+            player.name = $playerCell.find( 'span > a' ).text().trim();
             var page = $playerCell.find( 'span > a' ).attr( 'title' ).replace( ' ( page does not exist )', '' );
             if ( cleanTitle( page ) != cleanTitle( player.name ) ) {
                 player.page = page;
@@ -59,7 +63,7 @@ $.fn.lastMatchData = function ( options ) {
         $playerCell.find( 'img' ).each( function() {
             var filename = $( this ).attr( 'src' ).match( /[^\/]*\.(png|gif)$/ )[ 0 ];
             if ( filename.match( /^[A-Z][a-z][a-z]?\.(png|gif)$/ ) !== null ) {
-                player.flag = filename.match( /^([A-Z][a-z][a-z]?)\.(png|gif)$/ )[ 1 ].toLowerCase( );
+                player.flag = filename.match( /^([A-Z][a-z][a-z]?)\.(png|gif)$/ )[ 1 ].toLowerCase();
             }
         } );
         var raceColorMatch = $playerCell.css( 'background' ).match( /rgba?\(( [^0][^,]* ), ( [^,]* ), ( [^,\ )]*)/ );
@@ -126,7 +130,7 @@ $.fn.lastMatchData = function ( options ) {
             } else {
                 timeOfDay = '00:00';
             }
-            endDate = new Date( $( this ).parent().find( '.infobox-cell-2:not(.infobox-description)' ).text( ) + ' ' + timeOfDay + ' UTC' );
+            endDate = new Date( $( this ).parent().find( '.infobox-cell-2:not(.infobox-description)' ).text() + ' ' + timeOfDay + ' UTC' );
             return;
         }
     } );
@@ -190,14 +194,14 @@ $.fn.lastMatchData = function ( options ) {
                 player1Name = $player1Div.text().trim();
                 player2Name = $player2Div.text().trim();
                 player1Win = $player1Div.css( 'fontWeight' ) == 'bold';
+                player1Score = $( this ).children( ':not(.matchlistslot)' ).eq( 0 ).text().trim();
+                player2Score = $( this ).children( ':not(.matchlistslot)' ).eq( 1 ).text().trim();
                 if ( player1Win && $player2Div.css( 'fontWeight' ) == 'bold' ) {
                     console.log( ( ++i ), 'Error:', $player1Div.text().trim(), 'vs', $player2Div.text().trim() );
                     return;
                 } else {
                     player2Win = !player1Win;
                 }
-                player1Score = $( this ).children( ':not(.matchlistslot)' ).eq( 0 ).text().trim();
-                player2Score = $( this ).children( ':not(.matchlistslot)' ).eq( 1 ).text().trim();
                 //console.log( ( ++i ), player1Name + ( player1Win ? '[W]' : '' ), player1Score, '-', player2Score, player2Name + ( player2Win ? '[W]' : '' ) );
                 if ( groupPlayers.length ) {
                     for ( j = 0; j < groupPlayers.length; ++j ) {
@@ -274,15 +278,16 @@ $.fn.lastMatchData = function ( options ) {
                 player1 = parsePlayerInBracket( $player1Div );
                 player2 = parsePlayerInBracket( $player2Div );
                 player1Win = $player1Div.css( 'fontWeight' ) == 'bold';
+                player1Score = $player1Div.children( '.bracket-score' ).text().trim();
+                player2Score = $player2Div.children( '.bracket-score' ).text().trim();
                 if ( player1Win && $player2Div.css( 'fontWeight' ) == 'bold' ) {
-                    console.log( ( ++i ), 'Error:', player1.name, 'vs', player2.name );
+                    if ( player1Score != 'Q' || player2Score != 'Q' )
+                        console.log( ( ++i ), 'Error:', player1.name, 'vs', player2.name );
                     return;
                 } else {
                     player2Win = !player1Win;
                 }
-                player1Score = $player1Div.children( '.bracket-score' ).text().trim();
-                player2Score = $player2Div.children( '.bracket-score' ).text().trim();
-                //console.log( ( ++i ), player1Name + ( player1Win ? '[W]' : '' ), player1Score, '-', player2Score, player2Name + ( player2Win ? '[W]' : '' ) );
+                //console.log( ( ++i ), player1.name + ( player1Win ? '[W]' : '' ), player1Score, '-', player2Score, player2.name + ( player2Win ? '[W]' : '' ) );
                 for ( j = 0; j < players.length; ++j ) {
                     if ( player1Index < 0 && player1.name == players[ j ].name ) {
                         player1Index = j;
@@ -367,7 +372,10 @@ $.fn.lastMatchData = function ( options ) {
                     entries[ j ].lastvsscore = players[ j ].lastMatch.vsScore;
                 }
             }
-            entries[ j ].date = ( forceDateToEndDate ? endDate.toISODateOnly( ) : players[ j ].lastMatch.date );
+            if ( players[ j ].lastMatch.date )
+                entries[ j ].date = players[ j ].lastMatch.date;
+            else
+                entries[ j ].date = defaultDateIsEndDate ? endDate.toISODateOnly() : '';
             hasAnEntryWithNonEmptyDate |= ( entries[ j ].date !== '' );
         }
     }
@@ -424,7 +432,7 @@ $.fn.lastMatchData = function ( options ) {
         } ).done( function( data ) {
             var originalText = data.query.pages[ data.query.pageids[ 0 ] ].revisions[ 0 ][ '*' ];
             if ( action == 'outputcode' && codeForTableOnly ) {
-                var tableMatch = originalText.match( /\{\{ *( Template *: )? *[Pp]rize[ _]pool[ _]start *[\|\}][.\s\S]+?\{\{ *( Template *: )? *[Pp]rize[ _]pool[ _]end *\}\}/ );
+                var tableMatch = originalText.match( /\{\{ *(Template *:)? *[Pp]rize[ _]pool[ _]start *[\|\}][.\s\S]+?\{\{ *(Template *:)? *[Pp]rize[ _]pool[ _]end *\}\}/ );
                 if ( tableMatch !== null )
                     originalText = tableMatch[ 0 ];
             }
@@ -445,7 +453,7 @@ $.fn.lastMatchData = function ( options ) {
                 var re = new RegExp( regExPattern );
                 var matches = modifiedText.match( re );
                 if ( matches !== null ) {
-                    var i = matches[ 2 ];
+                    i = matches[ 2 ];
                     var append = [];
                     if ( entries[ j ].hasLastMatchInGroupStage ) {
                         append.push( '|wdl' + i + '=' + entries[ j ].wdl );
@@ -461,12 +469,41 @@ $.fn.lastMatchData = function ( options ) {
                             append.push( '|lastvsscore' + i + '=' + entries[ j ].lastvsscore );
                         }
                     }
-                    if ( hasAnEntryWithNonEmptyDate ) {
+                    if ( forceEmptyDateField ) {
+                        append.push( '|date' + i + '=' );
+                    } else if ( ( entries[ j ].date !== '' || entries[ j ].date != endDate.toISODateOnly() || !noDateIfEndDate ) &&
+                        hasAnEntryWithNonEmptyDate ) {
                         append.push( '|date' + i + '=' + entries[ j ].date );
                     }
                     var separator = ( matches[ 1 ].match( / +\|/ ) !== null ) ? ' ' : '';
                     var appendText = separator + append.join( separator );
                     modifiedText = modifiedText.replace( re, matches[ 1 ] + appendText );
+                }
+            }
+            if ( groupDatesInSlots ) {
+                var ppsRe = /(\{\{ *(?:Template *:)?[Pp]rize[ _]pool[ _]slot *(?:\|(?:place|usdprize|localprize|points)= *(?:\[\[[^\]]*\]\]|[^\|\n]*) *| )*)(\n*[\s\S]*?)\}\}/g,
+                    ppsMatches,
+                    textToProcess = modifiedText;
+                while ( ( ppsMatches = ppsRe.exec( textToProcess ) ) !== null ) {
+                    var date = null,
+                        dateRe = / *\| *date[0-9]+ *= *([^\|\}\n]*)/g,
+                        sameDate = true,
+                        dateMatches,
+                        dateMatchesCount = 0,
+                        modifiedPpsMatch = ppsMatches[0];
+                    while ( ( dateMatches = dateRe.exec( ppsMatches[ 2 ] ) ) !== null ) {
+                        dateMatchesCount++;
+                        if ( date === null ) {
+                            date = dateMatches[ 1 ];
+                        } else if ( date != dateMatches[ 1 ] ) {
+                            sameDate = false;
+                            break;
+                        }
+                    }
+                    if ( dateMatchesCount > 1 && date !== '' && sameDate ) {
+                        modifiedPpsMatch = ppsMatches[1] + '|date=' + date + ppsMatches[2].replace( dateRe, '' ) + '}}';
+                        modifiedText = modifiedText.replace(ppsMatches[0], modifiedPpsMatch);
+                    }
                 }
             }
 
