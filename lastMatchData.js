@@ -9,8 +9,8 @@ $.fn.lastMatchData = function ( options ) {
         defaultDateIsEndDate = options.defaultDateIsEndDate !== undefined ? options.defaultDateIsEndDate : false,
         forceEmptyDateField = options.forceEmptyDateField !== undefined ? options.forceEmptyDateField : false,
         noDateIfEndDate = options.noDateIfEndDate !== undefined ? options.noDateIfEndDate : true,
-        groupDatesInSlots = options.groupDatesInSlots !== undefined ? options.groupDatesInSlots : true;
-        matchesBefore3amCountForTheDayBefore = options.matchesBefore3amCountForTheDayBefore !== undefined ? $options.matchesBefore3amCountForTheDayBefore : true;
+        groupDatesInSlots = options.groupDatesInSlots !== undefined ? options.groupDatesInSlots : true,
+        matchesBefore3amCountForTheDayBefore = options.matchesBefore3amCountForTheDayBefore !== undefined ? options.matchesBefore3amCountForTheDayBefore : true;
 
     Date.prototype.toISODateOnly = function() {
         return this.getFullYear() +
