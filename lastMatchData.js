@@ -97,7 +97,7 @@ $.fn.lastMatchData = function ( options ) {
         if ( cleanDate.match( /.*(?:19|20)[0-9]{2}/ ) !== null ) {
             date = new Date( cleanDate );
             if ( matchesBefore3amCountForTheDayBefore && ( date.getHours() > 0 || date.getMinutes() > 0 ) && date.getHours() < 3 )
-                date.setDate( d.getDate() - 1 );
+                date.setDate( date.getDate() - 1 );
             return date.toISODateOnly();
         }
         return '';
