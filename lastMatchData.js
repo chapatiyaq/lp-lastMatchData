@@ -10,6 +10,7 @@ $.fn.lastMatchData = function ( options ) {
         forceEmptyDateField = options.forceEmptyDateField !== undefined ? options.forceEmptyDateField : false,
         noDateIfEndDate = options.noDateIfEndDate !== undefined ? options.noDateIfEndDate : true,
         groupDatesInSlots = options.groupDatesInSlots !== undefined ? options.groupDatesInSlots : true;
+        matchesBefore3amCountForTheDayBefore = options.matchesBefore3amCountForTheDayBefore !== undefined ? $options.matchesBefore3amCountForTheDayBefore : true;
 
     Date.prototype.toISODateOnly = function() {
         return this.getFullYear() +
@@ -27,7 +28,7 @@ $.fn.lastMatchData = function ( options ) {
                 player.flag = filename.match( /^([A-Z][a-z][a-z]?)\.(png|gif)$/ )[ 1 ].toLowerCase();
             }
         } );
-        player.name = $playerCell.text().trim();
+        player.name = $playerCell.find( 'span' ).text().trim();
         if ( $playerCell.find( 'span > a' ).length == 1 ) {
             player.name = $playerCell.find( 'span > a' ).text().trim();
             var page = $playerCell.find( 'span > a' ).attr( 'title' ).replace( ' (page does not exist)', '' );
@@ -49,8 +50,8 @@ $.fn.lastMatchData = function ( options ) {
             }
         } );
         player.name = $playerCell.text().trim();
-        if ( $playerCell.find( 'a:nth-child( 3)' ).length > 0 ) {
-            var page = $playerCell.find( 'a:nth-child( 3)' ).attr( 'title' ).replace( ' (page does not exist)', '' );
+        if ( $playerCell.find( 'a:nth-child(3)' ).length > 0 ) {
+            var page = $playerCell.find( 'a:nth-child(3)' ).attr( 'title' ).replace( ' (page does not exist)', '' );
             if ( cleanTitle( page ) != cleanTitle( player.name ) ) {
                 player.page = page;
             }
@@ -87,10 +88,17 @@ $.fn.lastMatchData = function ( options ) {
     }
 
     function parseDate( $dateCell ) {
-        var dateMatch;
-        dateMatch = $dateCell.text().replace( /\[[^\]]+\]/g, '' ).match( /.*(?:19|20)[0-9]{2}/ );
-        if ( dateMatch !== null ) {
-            return ( new Date( dateMatch ) ).toISODateOnly();
+        var date,
+            cleanDate = $dateCell.text();
+        cleanDate = cleanDate
+                .replace( /\[[^\]]+\]/g, '' )
+                .replace(' - ', '')
+                .replace(/([0-9]{1,2}[0-9]:[0-9]{2}) *[A-Z]+/, '\1');
+        if ( cleanDate.match( /.*(?:19|20)[0-9]{2}/ ) !== null ) {
+            date = new Date( cleanDate );
+            if ( matchesBefore3amCountForTheDayBefore && ( date.getHours() > 0 || date.getMinutes() > 0 ) && date.getHours() < 3 )
+                date.setDate( d.getDate() - 1 );
+            return date.toISODateOnly();
         }
         return '';
     }
@@ -167,6 +175,7 @@ $.fn.lastMatchData = function ( options ) {
                     players.push( player );
                     player.index = players.length - 1;
                 } else {
+                    player.index = -1;
                     for ( j = 0; j < players.length; ++j ) {
                         if ( player.name == players[ j ].name ) {
                             player.index = j;
@@ -207,13 +216,13 @@ $.fn.lastMatchData = function ( options ) {
                     for ( j = 0; j < groupPlayers.length; ++j ) {
                         if ( player1Index < 0 && player1Name == groupPlayers[ j ].name ) {
                             player1Index = groupPlayers[ j ].index;
-                            if ( player1Index )
+                            if ( player1Index >= 0 )
                                 players[ player1Index ].wdl = groupPlayers[ j ].wdl;
                             continue;
                         }
                         if ( player2Index < 0 && player2Name == groupPlayers[ j ].name ) {
                             player2Index = groupPlayers[ j ].index;
-                            if ( player2Index )
+                            if ( player2Index >= 0 )
                                 players[ player2Index ].wdl = groupPlayers[ j ].wdl;
                         }
                     }
@@ -449,7 +458,7 @@ $.fn.lastMatchData = function ( options ) {
                     regExPattern += rePage + ' *\\{\\{!\\}\\} *';
                 }
                 regExPattern += entries[ j ].player.name;
-                regExPattern += '[^\\}\\n]+?([0-9]+)=[^\\}\\n]+?) *(?=[\\}\\n])';
+                regExPattern += ' *\\|[^\\}\\n]+?([0-9]+)=[^\\}\\n]+?) *(?=[\\}\\n])';
                 var re = new RegExp( regExPattern );
                 var matches = modifiedText.match( re );
                 if ( matches !== null ) {
